@@ -8,6 +8,6 @@
     <p class="card-header"><b> {{ post.user }}</b> </p>
     <p class="card-body"><a href="{{ post.get_absolute_url }}">{{ post.body|slice:":100" }}</a> </p>
 </div>
-
+    <br/>
 {% endfor %}
 {% endblock %}
