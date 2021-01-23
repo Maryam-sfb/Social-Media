@@ -1,9 +1,9 @@
-from django.shortcuts import render, redirect,get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404
 from .forms import UserLoginForm, UserRegistrationForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.models import User
-
+from posts.models import Post
 
 def user_login(request):
     if request.method == 'POST':
@@ -45,7 +45,8 @@ def user_logout(request):
 
 def user_dashboard(request, user_id):
     user = get_object_or_404(User, id=user_id)
-    return render(request, 'account/dashboard.html', {'user': user})
+    posts = Post.objects.filter(user=user)
+    return render(request, 'account/dashboard.html', {'user': user, 'posts': posts})
 
 
 
