@@ -2,13 +2,15 @@
 {% block title %} {{ user }}'s Profile {% endblock %}
 
 {% block content %}
+    {% if self_dash %}
     <a href="{% url 'posts:add_post' request.user.id %}"> Add new post</a>
+    {% endif %}
     <h4 class="text-center">{{ user|capfirst }}</h4>
     <p class="text-center">{{ user.profile.bio }}</p>
     <br/>
     {% for post in posts %}
     <div class="card">
-        <p class="card-body"><a href="{{ post.get_absolute_url }}">{{ post.body|slice:":100" }}</a> </p>
+        <p class="card-body"><a href="{{ post.get_absolute_url }}">{{ post.body|slice:":100" }}....</a> </p>
     </div>
     {% empty %}
     <p>This user has no posts yet.</p>

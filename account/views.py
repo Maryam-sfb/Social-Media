@@ -4,8 +4,11 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.models import User
 from posts.models import Post
+from django.contrib.auth.decorators import login_required
+
 
 def user_login(request):
+    next = request.GET.get('next')
     if request.method == 'POST':
         form = UserLoginForm(request.POST)
         if form.is_valid():
@@ -15,7 +18,9 @@ def user_login(request):
             if user is not None:
                 login(request, user)
                 messages.success(request, 'You logged in successfully', 'success')
-                return redirect('posts:all_posts')
+                if next:
+                    return redirect(next)
+                return redirect('account:dashboard', user.id)
             else:
                 messages.error(request, 'Wrong username or password!', 'warning')
     else:
@@ -37,16 +42,21 @@ def user_register(request):
     return render(request, 'account/register.html', {'form': form})
 
 
+@login_required(login_url='account:login')
 def user_logout(request):
     logout(request)
     messages.success(request, 'You logged out successfully', 'primary')
     return redirect('posts:all_posts')
 
 
+@login_required(login_url='account:login')
 def user_dashboard(request, user_id):
     user = get_object_or_404(User, id=user_id)
     posts = Post.objects.filter(user=user)
-    return render(request, 'account/dashboard.html', {'user': user, 'posts': posts})
+    self_dash = False
+    if request.user.id == user_id:
+        self_dash = True
+    return render(request, 'account/dashboard.html', {'user': user, 'posts': posts, 'self_dash': self_dash})
 
 
 

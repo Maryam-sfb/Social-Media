@@ -7,5 +7,9 @@
 <div class="card">
     <p class="card-header"><b> {{ post.user }} </b>| {{ post.created }} </p>
     <p class="card-body">{{ post.body }} </p>
+    {% if request.user.is_authenticated and request.user.id == post.user.id %}
+    <a href="{% url 'posts:post_delete' post.user.id post.id %}" class="text-center" style="color:red">Delete post</a>
+    <a href="{% url 'posts:post_edit' post.user.id post.id %}" class="text-center">Edit post</a>
+    {% endif %}
 </div>
 {% endblock %}
