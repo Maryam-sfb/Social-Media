@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
     <!-- CSS only -->
@@ -11,7 +11,7 @@
  {% include 'inc/navbar.html' %}
  {% include 'inc/messages.html' %}
 
- <div class="container pt-4">
+ <div class="container pt-5">
     <div class="row">
         <div class="col-sm-12">
             {% block content %}
@@ -19,7 +19,12 @@
         </div>
     </div>
  </div>
-
+<footer>
+    <hr/>
+    <div class="container">
+    <center> &copy;Copyright 2021  </center>
+     <center> <div> <a href="#">Terms of service</a></div> </center>
+    </div>
+</footer>
 </body>
-</html>
 </html>

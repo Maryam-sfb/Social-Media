@@ -1,15 +1,52 @@
 {% extends 'base.html' %}
-
 {% block title %} Post {% endblock %}
 
 {% block content %}
-<br/>
 <div class="card">
     <p class="card-header"><b> {{ post.user }} </b>| {{ post.created }} </p>
     <p class="card-body">{{ post.body }} </p>
+
+    <div class="container">
+    {% with total=comments.count %}
+    <p>This post has {{ total }} comment{{ total|pluralize }}</p>
+    {% endwith %}
+    </div>
+
+    {% if request.user.is_authenticated %}
+    <div class="container">
+    <form method="post" class="col-md-12" novalidate>
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="save" class="btn btn-primary">
+    </form>
+        {% else %}
+        <p style="color:red" class="text-center">Only logged in users can leave comments!</p>
+        {% endif %}
+    </div>
+
+    {% for comment in comments %}
+    <div class="card bg-dark text-white" style="margin:10px">
+    <p class="card-header">
+        {{ comment.user }}:
+        {{ comment.body }}
+        {% for reply in comment.rcomment.all %}
+        <p class="bg-primary text-white p-1 m-4" >{{ reply.user }}: {{ reply.body }}</p>
+        {% endfor %}
+        {% if request.user.is_authenticated %}
+        <div class="card-body">
+            <form action="{% url 'posts:add_reply' post.id comment.id %}" method="post">
+                {% csrf_token %}
+                {{ reply_form.as_p }}
+                <input type="submit" value="send">
+            </form>
+        </div>
+        {% endif %}
+    </p>
+    </div>
+    {%  endfor %}
     {% if request.user.is_authenticated and request.user.id == post.user.id %}
-    <a href="{% url 'posts:post_delete' post.user.id post.id %}" class="text-center" style="color:red">Delete post</a>
-    <a href="{% url 'posts:post_edit' post.user.id post.id %}" class="text-center">Edit post</a>
+    <a href="{% url 'posts:post_delete' post.user.id post.id %}" class="text-center">Delete post</a>
+    <a href="{% url 'posts:post_edit' post.user.id post.id %}" class="text-center" style="margin:10px">Edit post</a>
     {% endif %}
 </div>
 {% endblock %}
