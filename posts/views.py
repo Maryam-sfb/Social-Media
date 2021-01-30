@@ -52,7 +52,7 @@ def add_post(request, user_id):
 def post_delete(request, user_id, post_id):
     if request.user.id == user_id:
         Post.objects.filter(id=post_id).delete()
-        messages.success(request, 'Your message was deleted successfully', 'success')
+        messages.success(request, 'Your post was deleted successfully', 'success')
         return redirect('account:dashboard', user_id)
     else:
         return redirect('posts:all_posts')

@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
+from .models import Profile
 
 
 messages = {
@@ -33,3 +34,43 @@ class UserRegistrationForm(forms.Form):
         if p1 and p2:
             if p1 != p2:
                 raise forms.ValidationError('Passwords must match!')
+
+
+class EditProfileForm(forms.ModelForm):
+    email = forms.EmailField()
+    class Meta:
+        model = Profile
+        fields = ('bio', 'age', 'phone')
+    widgets = {
+        'bio': forms.Textarea(attrs={'rows': 5, 'col': 10, 'class': 'form-control'}),
+    }
+
+
+class PhoneLoginform(forms.Form):
+    phone = forms.IntegerField()
+
+    def clean_phone(self):
+        phone_number = self.cleaned_data['phone']
+        phone = Profile.objects.filter(phone=phone_number)
+        if not phone.exists:
+            raise forms.ValidationError('This phone number does not exist!')
+        return phone_number
+
+
+class VerifyCodeForm(forms.Form):
+    code = forms.IntegerField()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

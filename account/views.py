@@ -1,11 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .forms import UserLoginForm, UserRegistrationForm
+from .forms import UserLoginForm, UserRegistrationForm, EditProfileForm, PhoneLoginform, VerifyCodeForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.models import User
 from posts.models import Post
 from django.contrib.auth.decorators import login_required
-
+from random import randint
+from kavenegar import *
+from .models import Profile
 
 def user_login(request):
     next = request.GET.get('next')
@@ -57,6 +59,57 @@ def user_dashboard(request, user_id):
     if request.user.id == user_id:
         self_dash = True
     return render(request, 'account/dashboard.html', {'user': user, 'posts': posts, 'self_dash': self_dash})
+
+
+@login_required(login_url='account:login')
+def edit_profile(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    if request.method == 'POST':
+        form = EditProfileForm(request.POST, instance=user.profile)
+        if form.is_valid():
+            form.save()
+            user.email = form.cleaned_data['email']
+            user.save()
+            messages.success(request,'Your profile was edited successfully', 'success')
+            return redirect('account:dashboard', user_id)
+    else:
+        form = EditProfileForm(instance=user.profile, initial={'email': request.user.email})
+    return render(request, 'account/edit_profile.html', {'form': form})
+
+
+def phone_login(request):
+    if request.method == 'POST':
+        form = PhoneLoginform(request.POST)
+        if form.is_valid():
+            phone = f"0{form.cleaned_data['phone']}"
+            random_num = randint(1000,9999)
+            api = KavenegarAPI('6B59357738414565307A503765434656746F4767423942726F4645466B5461374E70676E3451334479744D3D')
+            params = {'sender': '', 'receptor': phone, 'message': random_num}
+            api.sms_send(params)
+            return redirect('account:verify', phone, random_num)
+    else:
+        form = PhoneLoginform()
+    return render(request, 'account/phone_login.html', {'form': form})
+
+
+def verify(request, phone, random_num):
+    if request.method == 'POST':
+        form = VerifyCodeForm(request.POST)
+        if form.is_valid():
+            if random_num == form.cleaned_data['code']:
+                profile = get_object_or_404(Profile, phone=phone)
+                user = get_object_or_404(User, profile__id=profile.id)
+                login(request, user)
+                messages.success(request, 'You logged in successfully', 'success')
+                return redirect('posts:all_posts')
+            else:
+                messages.error(request, 'your code is wrong!', 'warning')
+    else:
+        form = VerifyCodeForm()
+    return render(request, 'account/verify.html', {'form': form})
+
+
+
 
 
 

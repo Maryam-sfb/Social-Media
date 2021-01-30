@@ -42,8 +42,7 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'SocialMedia.urls'
 
 AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
-    'account.authenticate.EmailAuthBackend',
+    'django.contrib.auth.backends.ModelBackend'
 ]
 
 TEMPLATES = [
