@@ -5,10 +5,13 @@
 <div class="card">
     <p class="card-header"><b> {{ post.user }} </b>| {{ post.created }} </p>
     <p class="card-body">{{ post.body }} </p>
-
     <div class="container">
+    {% if request.user.is_authenticated %}
+    <a href="{% url 'posts:post_like' post.id %}" class="btn btn-primary col-sm-2 {% if can_like %}disabled{% endif %}">Like ({{ post.likes_count }} likes)</a>
+    {% endif %}
+        <hr/>
     {% with total=comments.count %}
-    <p>This post has {{ total }} comment{{ total|pluralize }}</p>
+    <p style="color:green">This post has {{ total }} comment{{ total|pluralize }}</p>
     {% endwith %}
     </div>
 
@@ -19,6 +22,7 @@
         {{ form.as_p }}
         <input type="submit" value="save" class="btn btn-primary">
     </form>
+        <br/>
         {% else %}
         <p style="color:red" class="text-center">Only logged in users can leave comments!</p>
         {% endif %}

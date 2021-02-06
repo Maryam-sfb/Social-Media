@@ -7,7 +7,8 @@ from posts.models import Post
 from django.contrib.auth.decorators import login_required
 from random import randint
 from kavenegar import *
-from .models import Profile
+from .models import Profile, Relation
+from django.http import JsonResponse
 
 def user_login(request):
     next = request.GET.get('next')
@@ -56,9 +57,13 @@ def user_dashboard(request, user_id):
     user = get_object_or_404(User, id=user_id)
     posts = Post.objects.filter(user=user)
     self_dash = False
+    is_following = False
+    relation = Relation.objects.filter(from_user=request.user, to_user=user)
+    if relation.exists():
+        is_following = True
     if request.user.id == user_id:
         self_dash = True
-    return render(request, 'account/dashboard.html', {'user': user, 'posts': posts, 'self_dash': self_dash})
+    return render(request, 'account/dashboard.html', {'user': user, 'posts': posts, 'self_dash': self_dash, 'is_following': is_following})
 
 
 @login_required(login_url='account:login')
@@ -109,13 +114,30 @@ def verify(request, phone, random_num):
     return render(request, 'account/verify.html', {'form': form})
 
 
+@login_required(login_url='account:login')
+def follow(request):
+    if request.method == 'POST':
+        user_id = request.POST.get('user_id')
+        following = get_object_or_404(User, id=user_id)
+        check_relation = Relation.objects.filter(from_user=request.user, to_user=following)
+        if check_relation.exists():
+            return JsonResponse({'status': 'exists'})
+        else:
+            Relation(from_user=request.user, to_user=following).save()
+            return JsonResponse({'status': 'ok'})
 
 
-
-
-
-
-
+@login_required(login_url='account:login')
+def unfollow(request):
+    if request.method == 'POST':
+        user_id = request.POST.get('user_id')
+        following = get_object_or_404(User, id=user_id)
+        check_relation = Relation.objects.filter(from_user=request.user, to_user=following)
+        if check_relation.exists():
+            check_relation.delete()
+            return JsonResponse({'status': 'ok'})
+        else:
+            return JsonResponse({'status': 'notexists'})
 
 
 
