@@ -10,6 +10,8 @@ from kavenegar import *
 from .models import Profile, Relation
 from django.http import JsonResponse
 
+
+
 def user_login(request):
     next = request.GET.get('next')
     if request.method == 'POST':
@@ -86,18 +88,19 @@ def phone_login(request):
     if request.method == 'POST':
         form = PhoneLoginform(request.POST)
         if form.is_valid():
+            global phone, random_num
             phone = f"0{form.cleaned_data['phone']}"
             random_num = randint(1000,9999)
             api = KavenegarAPI('6B59357738414565307A503765434656746F4767423942726F4645466B5461374E70676E3451334479744D3D')
             params = {'sender': '', 'receptor': phone, 'message': random_num}
             api.sms_send(params)
-            return redirect('account:verify', phone, random_num)
+            return redirect('account:verify')
     else:
         form = PhoneLoginform()
     return render(request, 'account/phone_login.html', {'form': form})
 
 
-def verify(request, phone, random_num):
+def verify(request):
     if request.method == 'POST':
         form = VerifyCodeForm(request.POST)
         if form.is_valid():
@@ -138,6 +141,7 @@ def unfollow(request):
             return JsonResponse({'status': 'ok'})
         else:
             return JsonResponse({'status': 'notexists'})
+
 
 
 

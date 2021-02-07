@@ -72,5 +72,3 @@ class VerifyCodeForm(forms.Form):
 
 
 
-
-
